@@ -71,7 +71,7 @@ type ArtisanCreationProps = {
   dp: string;
   email: string;
   password: string;
-};
+}; 
 
 type ArtisanUpdationProps = {
   accountId: string;
