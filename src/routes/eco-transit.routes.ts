@@ -8,6 +8,7 @@ import {
   getEcoTransitBookings,
   getAllEcoTransits,
   getApplicationStatus,
+  findEcoTransitAdventure,
 } from '~/controllers/eco-transit.controller';
 
 const router = Router();
@@ -20,5 +21,6 @@ router.post('/option', createEcoTransitOption);
 router.get('/options/:transitId', getEcoTransitOptions);
 router.post('/booking', createEcoTransitBooking);
 router.get('/bookings/:transitId', getEcoTransitBookings);
+router.post('/find-eco-transit-adventure', findEcoTransitAdventure);
 
-export const ecoTransitRouter = router; 
+export const ecoTransitRouter = router;

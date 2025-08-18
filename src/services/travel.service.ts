@@ -322,4 +322,55 @@ export const travelService = {
       throw new Error("Failed to fetch application status");
     }
   },
+  findKashmirOdyssey: async (payload: {
+    tripCategory?: string;
+    adultTravelers?: number;
+    childTravelers?: number;
+    tripStartDate?: string;
+    tripEndDate?: string;
+    craftCulturalExperiences?: string[];
+    tourismRetreats?: string[];
+    supportServices?: string[];
+    focusAreas?: string[];
+    stayType?: string;
+  }) => {
+    try {
+      // Example: Assuming you have a model called TravelTour for odyssey packages
+      const tours = await prisma.travelTour.findMany({
+        where: {
+          ...(payload.tripCategory && { title: { contains: payload.tripCategory, mode: "insensitive" } }),
+          ...(payload.stayType && { features: { has: payload.stayType } }),
+          ...(payload.craftCulturalExperiences && payload.craftCulturalExperiences.length > 0 && {
+            features: { hasSome: payload.craftCulturalExperiences },
+          }),
+          ...(payload.tourismRetreats && payload.tourismRetreats.length > 0 && {
+            features: { hasSome: payload.tourismRetreats },
+          }),
+          ...(payload.supportServices && payload.supportServices.length > 0 && {
+            features: { hasSome: payload.supportServices },
+          }),
+          ...(payload.focusAreas && payload.focusAreas.length > 0 && {
+            features: { hasSome: payload.focusAreas },
+          }),
+        },
+      });
+
+      if (!tours || tours.length === 0) {
+        return { status: "error", message: "No Kashmir Odyssey tour found", data: null };
+      }
+
+      return {
+        status: "success",
+        message: "Kashmir Odyssey tour found",
+        data: tours,
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to search Kashmir Odyssey",
+        data: null,
+      };
+    }
+  },
 };

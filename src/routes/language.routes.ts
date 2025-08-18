@@ -5,7 +5,8 @@ import {
     getLanguageServiceFilters,
     toggleLanguageServiceStatus,
     languageApplicationStatus,
-    createLanguageBooking
+    createLanguageBooking,
+    findLanguageExploration
 } from '~/controllers/language.controller';
 
 const router = Router();
@@ -16,6 +17,7 @@ router.get('/application-status/:accountId',languageApplicationStatus)
 router.get('/:languageServiceId', getLanguageServiceById);
 
 router.post('/create-booking',createLanguageBooking)
+router.post('/find-language-exploration', findLanguageExploration);
 router.patch('/toggle-status', toggleLanguageServiceStatus);
 
 export const languageRouter = router;

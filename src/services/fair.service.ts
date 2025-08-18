@@ -342,4 +342,45 @@ export const fairService = {
       throw new Error("Failed to fetch fair bookings");
     }
   },
+
+  findFairByCriteria: async (payload: {
+    eventLocation?: string;
+    eventType?: any;
+    craftTheme?: string;
+    checkIn?: string;
+    checkOut?: string;
+    adults?: number;
+    children?: number;
+  }) => {
+    try {
+      // Find fairs by event location, event type, and craft theme (title)
+      const fairs = await prisma.fairEvent.findMany({
+        where: {
+          ...(payload.eventLocation && { location: { equals: payload.eventLocation, mode: "insensitive" } }),
+          ...(payload.eventType && { fairType: { equals: payload.eventType, mode: "insensitive" } }),
+          ...(payload.craftTheme && { title: { contains: payload.craftTheme, mode: "insensitive" } }),
+        },
+        include: {
+          fair: true,
+        },
+      });
+
+      if (!fairs || fairs.length === 0) {
+        return { status: "error", message: "No fair craft found", data: null };
+      }
+
+      return {
+        status: "success",
+        message: "Fair(s) found",
+        data: fairs,
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to search fair",
+        data: null,
+      };
+    }
+  },
 };

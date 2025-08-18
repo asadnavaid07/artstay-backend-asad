@@ -201,3 +201,22 @@ export const getAllSafariBookings = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const findSafariByDestinations = async (req: Request, res: Response) : Promise<void> =>  {
+  try {
+    const payload = req.body;
+    const result = await safariService.findSafariByDestinations(payload);
+    if (result.status === "error") {
+      res.status(404).json(result);
+      return;
+    }
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to search safari",
+      data: null,
+    });
+  }
+};

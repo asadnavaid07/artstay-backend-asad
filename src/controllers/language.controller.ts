@@ -93,3 +93,22 @@ export const createLanguageBooking = async (req: Request, res: Response) => {
         });
     }
 }
+
+export const findLanguageExploration = async (req: Request, res: Response) => {
+  try {
+    const payload = req.body;
+    const result = await languageService.findLanguageExploration(payload);
+    if (result.status === "error") {
+       res.status(404).json(result);
+       return;
+    }
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to search language exploration",
+      data: null,
+    });
+  }
+};

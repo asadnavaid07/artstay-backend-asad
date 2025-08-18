@@ -426,4 +426,66 @@ export const diningService = {
       throw new Error("Failed to fetch restaurant bookings");
     }
   },
+  findTraditionalDiningVoyage: async (payload: {
+    experienceType?: string;
+    date?: string;
+    time?: string;
+    guests?: number;
+    children?: number;
+    tablePreference?: string;
+    dietaryPreferences?: string[];
+    occasion?: string;
+    addOnServices?: string[];
+  }) => {
+    try {
+      // Only filter on fields that exist in RestaurantBooking model
+      // Supported: date (createdAt), guests (sum of DiningBookingItem.quantity)
+      const where: any = {};
+
+      // Filter by date (createdAt)
+      if (payload.date) {
+        // Assuming date is in YYYY-MM-DD format
+        const start = new Date(payload.date);
+        const end = new Date(payload.date);
+        end.setDate(end.getDate() + 1);
+        where.createdAt = { gte: start, lt: end };
+      }
+
+      // You can add more filters here if you add those fields to your schema
+
+      const bookings = await prisma.restaurantBooking.findMany({
+        where,
+        include: {
+          DiningBookingItem: true,
+          bookingDetail: true,
+          resturant: true,
+        },
+      });
+
+      // Filter by guests if requested (sum of DiningBookingItem.quantity)
+      let filtered = bookings;
+      if (payload.guests) {
+        filtered = bookings.filter(b =>
+          b.DiningBookingItem.reduce((sum, item) => sum + item.quantity, 0) === payload.guests
+        );
+      }
+
+      if (!filtered || filtered.length === 0) {
+        return { status: "error", message: "No Traditional dining voyage found", data: null };
+      }
+
+      return {
+        status: "success",
+        message: "Traditional dining voyage found",
+        data: filtered,
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to search traditional dining voyage",
+        data: null,
+      };
+    }
+  },
 };

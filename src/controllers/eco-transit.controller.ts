@@ -83,4 +83,23 @@ export const getApplicationStatus = async (req: Request, res: Response) => {
         logger.error(error);
         res.status(500).json({ status: 'error', message: error instanceof Error ? error.message : 'Failed to fetch application status', data: null });
     }
-}; 
+};
+
+export const findEcoTransitAdventure = async (req: Request, res: Response) => {
+  try {
+    const payload = req.body;
+    const result = await ecoTransitService.findEcoTransitAdventure(payload);
+    if (result.status === "error") {
+       res.status(404).json(result);
+       return;
+    }
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to search eco transit adventure",
+      data: null,
+    });
+  }
+};

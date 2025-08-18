@@ -883,6 +883,15 @@ enum AccountType {
   CRAFT_DOCUMENTOR_ADMIN
 }
 
+enum BusinessType {
+  kashmiriArtisiancollective
+  handicraftTrader
+  artisanNgo
+  womenLeadSelfHelpGroup
+  boutiqueWorkshop
+  individualartisan
+}
+
 /**
  * ECO TRANSIT
  */
@@ -938,4 +947,23 @@ model EcoTransitBooking {
   @@index([optionId])
   @@index([transitId])
   @@index([travelDate])
+}
+
+model Vendor {
+  vendorId             String       @id @default(cuid())
+  businessName         String
+  contactPerson        String
+  email                String       @unique
+  password             String
+  phoneNumber          String
+  businessType         BusinessType
+  location             String
+  yearsOfExperience    Int?
+  businessDescription  String
+  idCard               String
+  giCertificate        String?
+  sampleProductPhoto   String
+  businessRegistration String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 }

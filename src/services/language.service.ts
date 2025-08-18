@@ -220,4 +220,39 @@ export const languageService = {
       throw new Error('Failed to create language service booking')
     }
   },
+  findLanguageExploration: async (payload: {
+    serviceType?: string;
+    languages?: string[];
+    date?: string;
+    duration?: string;
+    contactMethod?: string;
+  }) => {
+    try {
+      // Assuming 'specialization' is used for serviceType, 'languages' for language match, 'availability' for date, 'serviceMode' for contactMethod
+      const services = await prisma.languageService.findMany({
+        where: {
+          ...(payload.serviceType && { specialization: { has: payload.serviceType } }),
+          ...(payload.languages && payload.languages.length > 0 && { languages: { hasSome: payload.languages } }),
+          ...(payload.contactMethod && { serviceMode: { has: payload.contactMethod } }),
+        },
+      });
+
+      if (!services || services.length === 0) {
+        return { status: "error", message: "No Language service found", data: null };
+      }
+
+      return {
+        status: "success",
+        message: "Language exploration service found",
+        data: services,
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to search language exploration",
+        data: null,
+      };
+    }
+  },
 };

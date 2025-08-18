@@ -16,6 +16,7 @@ import { rateplanRouter } from '~/routes/rateplan.route';
 import { priceRouter } from '~/routes/price.routes';
 import { reservationRouter } from '~/routes/reservation.routes';
 import { ecoTransitRouter } from './eco-transit.routes';
+import { vendorRouter } from '~/routes/vendor.routes';
 
 const router = Router();
 
@@ -39,5 +40,6 @@ router.use('/rateplan',rateplanRouter)
 router.use('/price',priceRouter)
 router.use('/reservation',reservationRouter)
 router.use('/eco-transit', ecoTransitRouter);
+router.use('/vendor', vendorRouter);
 
 export const mainRouter = router;

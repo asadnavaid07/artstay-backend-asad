@@ -110,4 +110,51 @@ export const ecoTransitService = {
       throw new Error("Failed to fetch application status");
     }
   },
-}; 
+  findEcoTransitAdventure: async (payload: {
+    pickup?: string;
+    destination?: string;
+    travelDate?: string;
+    numberOfGuests?: number;
+    vehicleType?: string;
+    accessibilityNeeds?: string[];
+    sustainabilityPreferences?: string[];
+    packageOption?: number;
+    occasion?: string;
+    addOnServices?: string[];
+  }) => {
+    try {
+      // Move all filters to top-level where, use relation filters for transit
+      const adventures = await prisma.ecoTransitOption.findMany({
+        where: {
+          ...(payload.vehicleType && { title: { equals: payload.vehicleType, mode: "insensitive" } }),
+          ...(payload.packageOption && { baseFee: { lte: payload.packageOption } }),
+          transit: {
+            ...(payload.pickup && { address: { contains: payload.pickup, mode: "insensitive" } }),
+            ...(payload.destination && { address: { contains: payload.destination, mode: "insensitive" } }),
+          },
+          // Add more filters as needed for accessibilityNeeds, sustainabilityPreferences, etc.
+        },
+        include: {
+          transit: true,
+        },
+      });
+
+      if (!adventures || adventures.length === 0) {
+        return { status: "error", message: "No Eco transit adventure found", data: null };
+      }
+
+      return {
+        status: "success",
+        message: "Eco transit adventure found",
+        data: adventures,
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to search eco transit adventure",
+        data: null,
+      };
+    }
+  },
+};

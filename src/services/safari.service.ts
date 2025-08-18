@@ -382,4 +382,46 @@ export const safariService = {
       throw new Error("Failed to fetch safari bookings");
     }
   },
+
+  findSafariByDestinations: async (payload: {
+    destinations: string[];
+    activityPreferences?: string;
+    timeSlot?: string;
+    checkIn?: string;
+    checkOut?: string;
+    adults?: number;
+    children?: number;
+  }) => {
+    try {
+      // Find safaris where address matches any of the destinations
+      const safaris = await prisma.safari.findMany({
+        where: {
+          address: {
+            in: payload.destinations,
+            mode: "insensitive",
+          },
+        },
+        include: {
+          SafariTour: true,
+        },
+      });
+
+      if (!safaris || safaris.length === 0) {
+        return { status: "error", message: "No safari found", data: null };
+      }
+
+      return {
+        status: "success",
+        message: "Safari(s) found",
+        data: safaris,
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to search safari",
+        data: null,
+      };
+    }
+  },
 };

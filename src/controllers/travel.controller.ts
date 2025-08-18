@@ -159,3 +159,22 @@ export const travelApplicationStatus = async (req: Request, res: Response) => {
     throw new Error("fair applcaition status error");
   }
 };
+
+export const findKashmirOdyssey = async (req: Request, res: Response) => {
+  try {
+    const payload = req.body;
+    const result = await travelService.findKashmirOdyssey(payload);
+    if (result.status === "error") {
+       res.status(404).json(result);
+       return;
+    }
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to search Kashmir Odyssey",
+      data: null,
+    });
+  }
+};

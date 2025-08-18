@@ -247,4 +247,215 @@ export const artisanService = {
       throw new Error("Failed to fetch artisan bookings");
     }
   },
+  findArtisanByCraft: async (payload: {
+    craft: string;
+    subCraft: string;
+    checkIn?: string;
+    checkOut?: string;
+    experienceGoals?: string;
+    travelType?: string;
+  }) => {
+    try {
+      // Find the craft by name
+      const craftRecord = await prisma.craft.findFirst({
+        where: { craftName: { equals: payload.craft, mode: "insensitive" } }
+      });
+      if (!craftRecord) {
+        return { status: "error", message: "No artisan craft found", data: null };
+      }
+
+      // Find the subCraft by name and craftId
+      const subCraftRecord = await prisma.subCraft.findFirst({
+        where: {
+          subCraftName: { equals: payload.subCraft, mode: "insensitive" },
+          craftId: craftRecord.craftId
+        }
+      });
+      if (!subCraftRecord) {
+        return { status: "error", message: "No artisan craft found", data: null };
+      }
+
+      // Find artisans with this craft and subCraft
+      const artisans = await prisma.artisan.findMany({
+        where: {
+          craftId: craftRecord.craftId,
+          subCraftId: subCraftRecord.subCraftId
+        },
+        include: {
+          craft: true,
+          subCraft: true
+        }
+      });
+
+      if (!artisans || artisans.length === 0) {
+        return { status: "error", message: "No artisan craft found", data: null };
+      }
+
+      return {
+        status: "success",
+        message: "Artisan(s) found",
+        data: artisans
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to search artisan craft",
+        data: null
+      };
+    }
+  },
+  findNearbyArtisan: async (payload: {
+    craft: string;
+    location: { country?: string; state?: string; city?: string };
+    visitDate?: string;
+  }) => {
+    try {
+      // Find the craft by name
+      const craftRecord = await prisma.craft.findFirst({
+        where: { craftName: { equals: payload.craft, mode: "insensitive" } }
+      });
+      if (!craftRecord) {
+        return { status: "error", message: "No artisan craft found", data: null };
+      }
+
+      // Find artisans by craft and location fields
+      const artisans = await prisma.artisan.findMany({
+        where: {
+          craftId: craftRecord.craftId,
+          AND: [
+            payload.location.country
+              ? { address: { contains: payload.location.country, mode: "insensitive" } }
+              : {},
+            payload.location.state
+              ? { address: { contains: payload.location.state, mode: "insensitive" } }
+              : {},
+            payload.location.city
+              ? { address: { contains: payload.location.city, mode: "insensitive" } }
+              : {},
+          ],
+        },
+        include: {
+          craft: true,
+          subCraft: true,
+        },
+      });
+
+      if (!artisans || artisans.length === 0) {
+        return { status: "error", message: "No artisan craft found", data: null };
+      }
+
+      return {
+        status: "success",
+        message: "Nearby artisan(s) found",
+        data: artisans,
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to search artisan craft",
+        data: null,
+      };
+    }
+  },
+  findTraditionalTour: async (payload: {
+    destination?: string;
+    tourPackage?: string;
+    budgetPerPerson?: number;
+    checkIn?: string;
+    checkOut?: string;
+    adults?: number;
+    children?: number;
+    tourPreferences?: string[];
+  }) => {
+    try {
+      // Only address in Artisan matches destination.
+      // No other model related to Artisan (ArtisanPackage, Portfolio, etc.) has fields matching the other filters.
+      // So, only filter by address (destination).
+      const where: any = {};
+
+      if (payload.destination) {
+        where.address = { contains: payload.destination, mode: "insensitive" };
+      }
+
+      // If you want to filter by other fields, you must add them to your Prisma schema.
+      // No related model (ArtisanPackage, Portfolio, etc.) has fields like tourPackage, budgetPerPerson, etc.
+
+      const tours = await prisma.artisan.findMany({
+        where,
+        include: {
+          craft: true,
+          subCraft: true,
+        },
+      });
+
+      if (!tours || tours.length === 0) {
+        return { status: "error", message: "No Traditional tour found", data: null };
+      }
+
+      return {
+        status: "success",
+        message: "Traditional tour found",
+        data: tours,
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to search traditional tour",
+        data: null,
+      };
+    }
+  },
+  findSustainableLivingTour: async (payload: {
+    accommodationType?: string;
+    checkIn?: string;
+    checkOut?: string;
+    adults?: number;
+    children?: number;
+    experienceFilters?: string[];
+    budgetTier?: number;
+  }) => {
+    try {
+      // Only filter by fields that exist in Artisan model or its related models.
+      // Artisan does NOT have experienceFilters, budgetTier, or accommodationType fields.
+      // Only address (for accommodationType) is a close match.
+      // No related model (ArtisanPackage, Portfolio, etc.) has experienceFilters or budgetTier.
+
+      const where: any = {};
+
+      // Filter by address as accommodationType (if you want to treat address as accommodationType)
+      if (payload.accommodationType) {
+        where.address = { contains: payload.accommodationType, mode: "insensitive" };
+      }
+
+      // You can add more filters here if you add those fields to your schema
+
+      const tours = await prisma.artisan.findMany({
+        where,
+        include: {
+          craft: true,
+          subCraft: true,
+        },
+      });
+
+      if (!tours || tours.length === 0) {
+        return { status: "error", message: "No sustainable living tour found", data: null };
+      }
+
+      return {
+        status: "success",
+        message: "Sustainable living tour(s) found",
+        data: tours,
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to search sustainable living tour",
+        data: null,
+      };
+    }
+  },
 };

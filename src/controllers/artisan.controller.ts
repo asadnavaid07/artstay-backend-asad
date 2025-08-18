@@ -215,3 +215,79 @@ export const getAllArtisanBookings = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const findArtisanByCraft = async (req: Request, res: Response) => {
+  try {
+    const payload = req.body;
+    const result = await artisanService.findArtisanByCraft(payload);
+    if (result.status === "error") {
+      res.status(404).json(result);
+      return;
+    }
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to search artisan craft",
+      data: null
+    });
+  }
+};
+
+export const findNearbyArtisan = async (req: Request, res: Response) => {
+  try {
+    const payload = req.body;
+    const result = await artisanService.findNearbyArtisan(payload);
+    if (result.status === "error") {
+      res.status(404).json(result);
+      return;
+    }
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to search artisan craft",
+      data: null,
+    });
+  }
+};
+
+export const findTraditionalTour = async (req: Request, res: Response) => {
+  try {
+    const payload = req.body;
+    const result = await artisanService.findTraditionalTour(payload);
+    if (result.status === "error") {
+      res.status(404).json(result);
+      return;
+    }
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to search traditional tour",
+      data: null,
+    });
+  }
+};
+
+export const findSustainableLivingTour = async (req: Request, res: Response) => {
+  try {
+    const payload = req.body;
+    const result = await artisanService.findSustainableLivingTour(payload);
+    if (result.status === "error") {
+      res.status(404).json(result);
+      return;
+    }
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to search sustainable living tour",
+      data: null,
+    });
+  }
+};
