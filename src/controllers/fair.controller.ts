@@ -204,7 +204,7 @@ export const findFairByCriteria = async (req: Request, res: Response) => {
     const payload = req.body;
     const result = await fairService.findFairByCriteria(payload);
     if (result.status === "error") {
-      res.status(404).json(result);
+      res.status(400).json(result);
       return;
     }
     res.status(200).json(result);

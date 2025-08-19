@@ -221,7 +221,7 @@ export const findArtisanByCraft = async (req: Request, res: Response) => {
     const payload = req.body;
     const result = await artisanService.findArtisanByCraft(payload);
     if (result.status === "error") {
-      res.status(404).json(result);
+      res.status(400).json(result);
       return;
     }
     res.status(200).json(result);
@@ -240,7 +240,7 @@ export const findNearbyArtisan = async (req: Request, res: Response) => {
     const payload = req.body;
     const result = await artisanService.findNearbyArtisan(payload);
     if (result.status === "error") {
-      res.status(404).json(result);
+      res.status(400).json(result);
       return;
     }
     res.status(200).json(result);
@@ -259,7 +259,7 @@ export const findTraditionalTour = async (req: Request, res: Response) => {
     const payload = req.body;
     const result = await artisanService.findTraditionalTour(payload);
     if (result.status === "error") {
-      res.status(404).json(result);
+      res.status(400).json(result);
       return;
     }
     res.status(200).json(result);
@@ -278,7 +278,7 @@ export const findSustainableLivingTour = async (req: Request, res: Response) => 
     const payload = req.body;
     const result = await artisanService.findSustainableLivingTour(payload);
     if (result.status === "error") {
-      res.status(404).json(result);
+      res.status(400).json(result);
       return;
     }
     res.status(200).json(result);

@@ -207,7 +207,7 @@ export const findSafariByDestinations = async (req: Request, res: Response) : Pr
     const payload = req.body;
     const result = await safariService.findSafariByDestinations(payload);
     if (result.status === "error") {
-      res.status(404).json(result);
+      res.status(400).json(result);
       return;
     }
     res.status(200).json(result);
