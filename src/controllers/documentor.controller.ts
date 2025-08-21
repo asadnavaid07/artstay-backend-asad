@@ -280,3 +280,22 @@ export const getAllDocumentorBookings = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const findCraftDocumentationJourney = async (req: Request, res: Response) => {
+  try {
+    const payload = req.body;
+    const result = await documentorService.findCraftDocumentationJourney(payload);
+    if (result.status === "error") {
+      res.status(400).json(result);
+      return;
+    }
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to search craft documentation journey",
+      data: null,
+    });
+  }
+};

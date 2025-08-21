@@ -18,6 +18,7 @@ import {
   updateDocumentorPackage,
   getDocumentorPackageById,
   getAllDocumentorBookings,
+  findCraftDocumentationJourney,
 } from "~/controllers/documentor.controller";
 
 const router = Router();
@@ -41,5 +42,6 @@ router.patch("/profile/:documentorId", updateDocumentorProfile);
 router.post("/create-profile", createDocumentorProfile);
 router.post("/create-booking", createDocumentorBooking);
 router.patch("/toggle-status", toggleDocumentorStatus);
+router.post('/find-craft-documentation-journey', findCraftDocumentationJourney);
 
 export const documentorRouter = router;

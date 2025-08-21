@@ -596,4 +596,53 @@ export const documentorService = {
       throw new Error("Failed to fetch documentor bookings");
     }
   },
+  findCraftDocumentationJourney: async (payload: {
+    "booking-type"?: string;
+    "select-services"?: string;
+    date?: string;
+    timeslot?: string;
+    outputformat?: string;
+    "preferred-delivery-method"?: string;
+  }) => {
+    try {
+      // Map payload fields to model fields as best as possible
+      // Example: select-services -> specialization, outputformat -> DocumentorPackage.packageType, etc.
+      const documentors = await prisma.craftDocumentor.findMany({
+        where: {
+          ...(payload["select-services"] && { specialization: { has: payload["select-services"] } }),
+          isActive: true,
+        },
+        include: {
+          DocumentorPackage: true,
+        },
+      });
+
+      // Filter by outputformat (packageType) if provided
+      let filtered = documentors;
+      if (payload.outputformat) {
+        filtered = filtered.filter(doc =>
+          doc.DocumentorPackage.some(pkg =>
+            pkg.packageType.toLowerCase() === payload.outputformat?.toLowerCase()
+          )
+        );
+      }
+
+      if (!filtered || filtered.length === 0) {
+        return { status: "error", message: "No artisy craft documentation found", data: null };
+      }
+
+      return {
+        status: "success",
+        message: "Craft documentation journey found",
+        data: filtered,
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to search craft documentation journey",
+        data: null,
+      };
+    }
+  },
 };
