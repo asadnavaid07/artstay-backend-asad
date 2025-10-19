@@ -89,7 +89,12 @@ export const fairService = {
         },
       });
 
-      if (!fair) throw new Error("Fair seller not found.");
+      if (!fair)
+        return {
+          status: "error" as const,
+          message: "Fair seller not found",
+          data: null,
+        };
 
       await prisma.fairEvent.create({
         data: {
@@ -345,24 +350,37 @@ export const fairService = {
 
   findFairByCriteria: async (payload: {
     eventLocation?: string;
-    eventType?: any;
-    craftTheme?: string;
-    checkIn?: string;
-    checkOut?: string;
-    adults?: number;
-    children?: number;
+    eventType?: string;
+    startDate?: string;
+    endDate?: string;
   }) => {
     try {
-      // Find fairs by event location, event type, and craft theme (title)
+      // Normalize enum filters for prisma enum comparisons
+      const normalizedLocation = payload.eventLocation
+        ? payload.eventLocation.toUpperCase()
+        : undefined;
+      const normalizedType = payload.eventType
+        ? payload.eventType.toUpperCase()
+        : undefined;
+
       const fairs = await prisma.fairEvent.findMany({
         where: {
-          ...(payload.eventLocation && { location: { equals: payload.eventLocation, mode: "insensitive" } }),
-          ...(payload.eventType && { fairType: { equals: payload.eventType, mode: "insensitive" } }),
-          ...(payload.craftTheme && { title: { contains: payload.craftTheme, mode: "insensitive" } }),
+          ...(normalizedLocation && { location: normalizedLocation as FairLocationEnum }),
+          ...(normalizedType && { fairType: normalizedType as FairTypeEnum }),
+          // Date overlap: event overlaps with requested window
+          ...((payload.startDate || payload.endDate) && {
+            AND: [
+              payload.startDate
+                ? { endDate: { gte: payload.startDate } }
+                : undefined,
+              payload.endDate
+                ? { startDate: { lte: payload.endDate } }
+                : undefined,
+            ].filter(Boolean) as any,
+          }),
         },
-        include: {
-          fair: true,
-        },
+        include: { fair: true },
+        orderBy: { startDate: 'asc' },
       });
 
       if (!fairs || fairs.length === 0) {

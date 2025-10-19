@@ -170,14 +170,51 @@ export const shopService = {
   },
   createProduct: async (product: ProductCreationProps) => {
     try {
-      const shop = await prisma.shop.findUnique({
+      let shop = await prisma.shop.findUnique({
         where: {
           accountId: product.accountId,
         },
       });
 
       if (!shop) {
-        throw new Error("Shop not found");
+        // Create a basic shop record for the user if it doesn't exist
+        shop = await prisma.shop.create({
+          data: {
+            businessName: "My Business",
+            shopName: "My Shop",
+            vendorType: "Individual Artisan",
+            address: "Address not provided",
+            city: "City not provided",
+            state: "State not provided",
+            country: "Country not provided",
+            zipCode: "00000",
+            ownerName: "Owner not provided",
+            phoneNumber: "0000000000",
+            email: "email@example.com",
+            website: "",
+            description: "Shop profile not completed yet",
+            productCategories: [],
+            isGICertified: false,
+            isHandmade: "Mixed",
+            pickupOptions: [],
+            deliveryTime: "Next Day",
+            deliveryFee: "0",
+            pricingStructure: "Fixed Price",
+            orderProcessing: "Instant Confirmation",
+            paymentMethods: [],
+            returnPolicy: "Standard return policy",
+            stockAvailability: "Ready Stock",
+            offersCustomization: false,
+            packagingType: "Standard",
+            shopTiming: "9 AM - 6 PM",
+            workingDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            dp: "/placeholder-shop.svg",
+            isActive: true,
+            accountId: product.accountId,
+            agreedToTerms: false,
+            agreedToBlacklist: false,
+          },
+        });
       }
 
       await prisma.product.create({
@@ -382,6 +419,83 @@ export const shopService = {
         throw new Error(error.message);
       }
       throw new Error("Failed to create shop order");
+    }
+  },
+  getShopOrders: async (accountId: string) => {
+    try {
+      // First get the shop for this account
+      const shop = await prisma.shop.findUnique({
+        where: { accountId },
+        select: { shopId: true },
+      });
+
+      if (!shop) {
+        return {
+          status: "error",
+          message: "Shop not found",
+          data: null,
+        };
+      }
+
+      // Get all orders for this shop with related data
+      const orders = await prisma.shopOrder.findMany({
+        where: { shopId: shop.shopId },
+        include: {
+          bookingDetail: true,
+          orderItems: {
+            include: {
+              product: {
+                select: {
+                  name: true,
+                  images: true,
+                  price: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return {
+        status: "success",
+        message: "Shop orders retrieved",
+        data: orders,
+      };
+    } catch (error) {
+      logger.error(error);
+      throw new Error("Failed to fetch shop orders");
+    }
+  },
+  updateOrderStatus: async (orderId: string, status: string) => {
+    try {
+      const updatedOrder = await prisma.shopOrder.update({
+        where: { orderId },
+        data: { status },
+        include: {
+          bookingDetail: true,
+          orderItems: {
+            include: {
+              product: {
+                select: {
+                  name: true,
+                  images: true,
+                  price: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return {
+        status: "success",
+        message: "Order status updated",
+        data: updatedOrder,
+      };
+    } catch (error) {
+      logger.error(error);
+      throw new Error("Failed to update order status");
     }
   },
 };

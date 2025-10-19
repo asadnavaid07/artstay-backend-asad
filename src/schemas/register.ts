@@ -49,7 +49,6 @@ export const safariUpdationSchema = z.object({
     address: z.string(),
     description: z.string(),
     dp: z.string(),
-    accountId: z.string()
 })
 
 export const fairCreationSchema = z.object({
@@ -134,8 +133,8 @@ export const shopUpdationSchema = z.object({
     packagingType: z.string(),
     shopTiming: z.string(),
     workingDays: z.array(z.string()),
-    agreedToTerms: z.boolean(),
-    agreedToBlacklist: z.boolean(),
+    agreedToTerms: z.boolean().optional(),
+    agreedToBlacklist: z.boolean().optional(),
     dp: z.string(),
     accountId: z.string()
 })

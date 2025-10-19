@@ -22,7 +22,10 @@ export const createArtisan = async (req: Request, res: Response) => {
 export const updateArtisan = async (req: Request, res: Response) => {
   try {
     const result = await registerationService.updateArtisan(req.body);
-    res.status(201).json(result);
+    if (result.status === "success") {
+      return res.status(200).json(result);
+    }
+    return res.status(400).json(result);
   } catch (error) {
     logger.error(error);
     res.status(500).json({
@@ -51,9 +54,26 @@ export const createSafari = async (req: Request, res: Response) => {
 
 export const updateSafari = async (req: Request, res: Response) => {
   try {
-    const result = await registerationService.updateSafari(req.body);
+    console.log('updateSafari controller called');
+    console.log('Request body:', req.body);
+    console.log('Request userId:', req.userId);
+    
+    const accountId = req.userId?.toString();
+    if (!accountId) {
+      console.log('No accountId found, user not authenticated');
+      res.status(401).json({ status: "error", message: "User not authenticated" });
+      return;
+    }
+    
+    console.log('AccountId from userId:', accountId);
+    const safariData = { ...req.body, accountId };
+    console.log('Safari data being sent to service:', safariData);
+    
+    const result = await registerationService.updateSafari(safariData);
+    console.log('Service result:', result);
     res.status(201).json(result);
   } catch (error) {
+    console.error('updateSafari controller error:', error);
     logger.error(error);
     res.status(500).json({
       status: "error",

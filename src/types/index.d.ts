@@ -183,6 +183,7 @@ type SafariUpdationProps = {
   lastName: string;
   address: string;
   description: string;
+  dp: string;
 };
 
 type SafariProps = {
@@ -384,12 +385,19 @@ type ShopCreationProps = {
 
 type ShopUpdationProps = {
   accountId: string;
+  businessName: string;
   shopName: string;
+  vendorType: string;
   address: string;
-  shopTiming: string;
-  workingDays: string[];
+  city: string;
+  state: string;
+  country: string;
+  zipCode: string;
+  ownerName: string;
+  phoneNumber: string;
+  website: string;
   description: string;
-  dp: string;
+  productCategories: string[];
   isGICertified: boolean;
   isHandmade: string;
   pickupOptions: string[];
@@ -404,7 +412,9 @@ type ShopUpdationProps = {
   packagingType: string;
   shopTiming: string;
   workingDays: string[];
-  agreedToTerms: boolean;
+  dp: string;
+  agreedToTerms?: boolean;
+  agreedToBlacklist?: boolean;
 };
 
 type ShopProps = {
@@ -448,8 +458,8 @@ type ProductCreationProps = {
   images: string[];
   category: string;
   material: string;
-  dimensions: string;
-  weight: number;
+  dimensions?: string;
+  weight?: number;
   stock: number;
   isAvailable: boolean;
   craftType: string;
@@ -465,8 +475,8 @@ type ProductUpdateProps = {
   images: string[];
   category: string;
   material: string;
-  dimensions: string;
-  weight: number;
+  dimensions?: string;
+  weight?: number;
   stock: number;
   isAvailable: boolean;
   craftType: string;
@@ -1450,4 +1460,50 @@ type EcoTransitProps = {
   description: string;
   isActive: boolean;
   accountId: string;
+};
+
+// Shop Order Types
+type ShopOrderProps = {
+  orderId: string;
+  isActive: boolean;
+  status: string;
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  total: number;
+  shopId: string;
+  bookingDetailId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  bookingDetail: BookingDetailProps;
+  orderItems: ShopOrderItemProps[];
+};
+
+type ShopOrderItemProps = {
+  orderItemId: string;
+  quantity: number;
+  price: number;
+  orderId: string;
+  productId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  product: {
+    name: string;
+    images: string[];
+    price: number;
+  };
+};
+
+type BookingDetailProps = {
+  bookingDetailId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  additionalNote: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  createdAt: Date;
+  updatedAt: Date;
 };

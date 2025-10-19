@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {  artisanApplicationStatus, artisanBooking, artisanDetailByAccountId, artisanDetailByArtisanId, getAllArtisanBookings, getAllArtisans, getAllArtisansPagination, getPortfolioByAccountId, getPortfolioByArtisanId, updateArtisanStatus, updatePortfolioArtisanId, findArtisanByCraft, findNearbyArtisan, findTraditionalTour, findSustainableLivingTour } from '~/controllers/artisan.controller';
+import {  artisanApplicationStatus, artisanBooking, artisanDetailByAccountId, artisanDetailByArtisanId, getAllArtisanBookings, getAllArtisans, getAllArtisansPagination, getPortfolioByAccountId, getPortfolioByArtisanId, updateArtisanStatus, updatePortfolioArtisanId, findArtisanByCraft, findNearbyArtisan, findTraditionalTour, findSustainableLivingTour, getArtisanBookedDates } from '~/controllers/artisan.controller';
 import { validate } from '~/middlewares/zod.middleware';
 import { artisanStatusUpdateSchema, artisanUpdatePortfolioSchema, createArtisanBookingSchema, } from '~/schemas/artisan';
 
@@ -14,6 +14,7 @@ router.get('/application-status/:accountId', artisanApplicationStatus)
 router.get('/account-portfolio/:accountId', getPortfolioByAccountId)
 router.get('/artisan-portfolio/:artisanId', getPortfolioByArtisanId)
 router.get('/bookings/:accountId', getAllArtisanBookings);
+router.get('/booked-dates/:artisanId', getArtisanBookedDates);
 router.get('/:artisanId', artisanDetailByArtisanId)
 router.put('/toggle-status', updateArtisanStatus)
 router.post('/status', validate(artisanStatusUpdateSchema), updatePortfolioArtisanId)

@@ -162,3 +162,40 @@ export const createShopOrder = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getShopOrders = async (req: Request, res: Response) => {
+  try {
+    const { accountId } = req.params;
+    const result = await shopService.getShopOrders(accountId);
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch shop orders",
+      data: null,
+    });
+  }
+};
+
+export const updateOrderStatus = async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    const result = await shopService.updateOrderStatus(orderId, status);
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to update order status",
+      data: null,
+    });
+  }
+};

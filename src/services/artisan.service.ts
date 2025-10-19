@@ -247,6 +247,37 @@ export const artisanService = {
       throw new Error("Failed to fetch artisan bookings");
     }
   },
+
+  getArtisanBookedDates: async (artisanId: string) => {
+    try {
+      // Get all bookings for this artisan that are not cancelled
+      const bookings = await prisma.artisanBooking.findMany({
+        where: {
+          artisanId: artisanId,
+          status: { not: "cancelled" }
+        },
+        select: {
+          startDate: true,
+          endDate: true,
+        },
+      });
+      
+      // Transform to the format expected by the frontend
+      const bookedDates = bookings.map(booking => ({
+        startDate: booking.startDate,
+        endDate: booking.endDate,
+      }));
+      
+      return {
+        status: "success",
+        message: "Artisan booked dates fetched successfully",
+        data: bookedDates,
+      };
+    } catch (error) {
+      logger.error(error);
+      throw new Error("Failed to fetch artisan booked dates");
+    }
+  },
   findArtisanByCraft: async (payload: {
     craft: string;
     subCraft: string;

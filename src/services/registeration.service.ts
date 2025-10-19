@@ -52,9 +52,9 @@ export const registerationService = {
   },
   updateArtisan: async (artisan: ArtisanUpdationProps) => {
     try {
-      await prisma.artisan.update({
+      await prisma.artisan.upsert({
         where: { accountId: artisan.accountId },
-        data: {
+        update: {
           firstName: artisan.firstName,
           lastName: artisan.lastName,
           address: artisan.address,
@@ -67,6 +67,21 @@ export const registerationService = {
           recongnition: artisan.recognition as Recognition,
           subCraftId: artisan.subCraftId,
           craftId: artisan.craftId,
+        },
+        create: {
+          firstName: artisan.firstName,
+          lastName: artisan.lastName,
+          address: artisan.address,
+          description: artisan.description,
+          dp: artisan.dp,
+          experience: artisan.experience as Experience,
+          education: artisan.education as Education,
+          certificate: artisan.certificate as Certificate,
+          training: artisan.training as Training,
+          recongnition: artisan.recognition as Recognition,
+          subCraftId: artisan.subCraftId,
+          craftId: artisan.craftId,
+          accountId: artisan.accountId,
         },
       });
       return { status: "success", message: "artisan updated", data: null };
@@ -114,11 +129,41 @@ export const registerationService = {
   },
   updateSafari: async (safari: SafariUpdationProps) => {
     try {
+      console.log('updateSafari called with:', safari);
+      console.log('Looking for Safari with accountId:', safari.accountId);
+      
+      // Check if Safari record exists
+      const existingSafari = await prisma.safari.findUnique({
+        where: { accountId: safari.accountId }
+      });
+      
+      console.log('Existing Safari record:', existingSafari);
+      
+      if (!existingSafari) {
+        console.log('Safari record not found, creating new one');
+        // Create new Safari record if it doesn't exist
+        await prisma.safari.create({
+          data: {
+            firstName: safari.firstName,
+            lastName: safari.lastName,
+            address: safari.address,
+            description: safari.description,
+            dp: safari.dp,
+            accountId: safari.accountId,
+          },
+        });
+        return { status: "success", message: "safari created", data: null };
+      }
+      
+      // Update existing Safari record
       await prisma.safari.update({
         where: { accountId: safari.accountId },
         data: {
           firstName: safari.firstName,
           lastName: safari.lastName,
+          address: safari.address,
+          description: safari.description,
+          dp: safari.dp,
         },
       });
       return { status: "success", message: "safari updated", data: null };
@@ -166,11 +211,22 @@ export const registerationService = {
   },
   updateFair: async (fair: FairUpdationProps) => {
     try {
-      await prisma.fair.update({
+      await prisma.fair.upsert({
         where: { accountId: fair.accountId },
-        data: {
+        update: {
           firstName: fair.firstName,
           lastName: fair.lastName,
+          address: fair.address,
+          description: fair.description,
+          dp: fair.dp,
+        },
+        create: {
+          firstName: fair.firstName,
+          lastName: fair.lastName,
+          address: fair.address,
+          description: fair.description,
+          dp: fair.dp,
+          accountId: fair.accountId,
         },
       });
       return { status: "success", message: "fair updated", data: null };
@@ -248,18 +304,90 @@ export const registerationService = {
   },
   updateShop: async (shop: ShopUpdationProps) => {
     try {
-      await prisma.shop.update({
+      // First check if shop exists
+      const existingShop = await prisma.shop.findUnique({
         where: { accountId: shop.accountId },
-        data: {
-          shopName: shop.shopName,
-          address: shop.address,
-          shopTiming: shop.shopTiming,
-          workingDays: shop.workingDays,
-          description: shop.description,
-          dp: shop.dp,
-        },
       });
-      return { status: "success", message: "shop updated", data: null };
+
+      if (!existingShop) {
+        // Create a new shop record if it doesn't exist
+        await prisma.shop.create({
+          data: {
+            businessName: shop.businessName,
+            shopName: shop.shopName,
+            vendorType: shop.vendorType,
+            address: shop.address,
+            city: shop.city,
+            state: shop.state,
+            country: shop.country,
+            zipCode: shop.zipCode,
+            ownerName: shop.ownerName,
+            phoneNumber: shop.phoneNumber,
+            email: "email@example.com", // Default email since it's required
+            website: shop.website,
+            description: shop.description,
+            productCategories: shop.productCategories,
+            isGICertified: shop.isGICertified,
+            isHandmade: shop.isHandmade,
+            pickupOptions: shop.pickupOptions,
+            deliveryTime: shop.deliveryTime,
+            deliveryFee: shop.deliveryFee,
+            pricingStructure: shop.pricingStructure,
+            orderProcessing: shop.orderProcessing,
+            paymentMethods: shop.paymentMethods,
+            returnPolicy: shop.returnPolicy,
+            stockAvailability: shop.stockAvailability,
+            offersCustomization: shop.offersCustomization,
+            packagingType: shop.packagingType,
+            shopTiming: shop.shopTiming,
+            workingDays: shop.workingDays,
+            dp: shop.dp,
+            isActive: true,
+            accountId: shop.accountId,
+            agreedToTerms: shop.agreedToTerms ?? false,
+            agreedToBlacklist: shop.agreedToBlacklist ?? false,
+          },
+        });
+        return { status: "success", message: "shop profile created", data: null };
+      } else {
+        // Update existing shop record
+        await prisma.shop.update({
+          where: { accountId: shop.accountId },
+          data: {
+            businessName: shop.businessName,
+            shopName: shop.shopName,
+            vendorType: shop.vendorType,
+            address: shop.address,
+            city: shop.city,
+            state: shop.state,
+            country: shop.country,
+            zipCode: shop.zipCode,
+            ownerName: shop.ownerName,
+            phoneNumber: shop.phoneNumber,
+            website: shop.website,
+            description: shop.description,
+            productCategories: shop.productCategories,
+            isGICertified: shop.isGICertified,
+            isHandmade: shop.isHandmade,
+            pickupOptions: shop.pickupOptions,
+            deliveryTime: shop.deliveryTime,
+            deliveryFee: shop.deliveryFee,
+            pricingStructure: shop.pricingStructure,
+            orderProcessing: shop.orderProcessing,
+            paymentMethods: shop.paymentMethods,
+            returnPolicy: shop.returnPolicy,
+            stockAvailability: shop.stockAvailability,
+            offersCustomization: shop.offersCustomization,
+            packagingType: shop.packagingType,
+            shopTiming: shop.shopTiming,
+            workingDays: shop.workingDays,
+            dp: shop.dp,
+            ...(shop.agreedToTerms !== undefined && { agreedToTerms: shop.agreedToTerms }),
+            ...(shop.agreedToBlacklist !== undefined && { agreedToBlacklist: shop.agreedToBlacklist }),
+          },
+        });
+        return { status: "success", message: "shop updated", data: null };
+      }
     } catch (error) {
       logger.error(error);
       return {

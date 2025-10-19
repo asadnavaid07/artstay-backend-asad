@@ -137,6 +137,9 @@ export const safariService = {
   getAllSafaris: async () => {
     try {
       const safaris: SafariProps[] = await prisma.safari.findMany({
+        include: {
+          SafariTour: true,
+        },
         orderBy: {
           createdAt: "desc",
         },
@@ -384,36 +387,70 @@ export const safariService = {
   },
 
   findSafariByDestinations: async (payload: {
-    destinations: string[];
-    activityPreferences?: string;
-    timeSlot?: string;
-    checkIn?: string;
-    checkOut?: string;
-    adults?: number;
-    children?: number;
+    title: string;
+    activityPreferences?: string[];
+    duration?: string;
   }) => {
     try {
-      // Find safaris where address matches any of the destinations
+      console.log("Received payload:", payload);
+      console.log("Activity preferences type:", typeof payload.activityPreferences);
+      console.log("Activity preferences value:", payload.activityPreferences);
+      
+      // Ensure activityPreferences is always an array
+      const activityPrefs = Array.isArray(payload.activityPreferences) 
+        ? payload.activityPreferences 
+        : payload.activityPreferences ? [payload.activityPreferences] : [];
+      
+      console.log("Processed activity preferences:", activityPrefs);
+      
+      // Find all safaris first, then filter tours
       const safaris = await prisma.safari.findMany({
-        where: {
-          address: {
-            in: payload.destinations,
-            mode: "insensitive",
-          },
-        },
         include: {
           SafariTour: true,
         },
       });
 
-      if (!safaris || safaris.length === 0) {
+      // Filter safaris that have matching tours
+      const filteredSafaris = safaris.filter(safari => {
+        return safari.SafariTour.some(tour => {
+          // Check title match
+          const titleMatch = tour.title?.trim().toLowerCase() === payload.title?.trim().toLowerCase();
+
+          
+          // Check activity preferences match
+          const activityMatch = activityPrefs.length === 0 || 
+            activityPrefs.some(pref => tour.features.includes(pref));
+          
+          // Check duration match
+          const durationMatch = !payload.duration || 
+            tour.duration.toLowerCase().includes(payload.duration.toLowerCase());
+          
+          return titleMatch && activityMatch && durationMatch;
+        });
+      });
+
+      // Update the tours to only include matching ones
+      const safarisWithFilteredTours = filteredSafaris.map(safari => ({
+        ...safari,
+        SafariTour: safari.SafariTour.filter(tour => {
+          const titleMatch = tour.title.toLowerCase() === payload.title.toLowerCase();
+          const activityMatch = activityPrefs.length === 0 || 
+            activityPrefs.some(pref => tour.features.includes(pref));
+          const durationMatch = !payload.duration || 
+            tour.duration.toLowerCase().includes(payload.duration.toLowerCase());
+          
+          return titleMatch && activityMatch && durationMatch;
+        })
+      }));
+
+      if (!safarisWithFilteredTours || safarisWithFilteredTours.length === 0) {
         return { status: "error", message: "No safari found", data: null };
       }
 
       return {
         status: "success",
         message: "Safari(s) found",
-        data: safaris,
+        data: safarisWithFilteredTours,
       };
     } catch (error) {
       logger.error(error);

@@ -216,6 +216,20 @@ export const getAllArtisanBookings = async (req: Request, res: Response) => {
   }
 };
 
+export const getArtisanBookedDates = async (req: Request, res: Response) => {
+  try {
+    const result = await artisanService.getArtisanBookedDates(req.params.artisanId);
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to fetch artisan booked dates",
+      data: null,
+    });
+  }
+};
+
 export const findArtisanByCraft = async (req: Request, res: Response) => {
   try {
     const payload = req.body;

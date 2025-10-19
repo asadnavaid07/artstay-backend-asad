@@ -18,6 +18,7 @@ import {
   updateEcoTransit,
 } from "~/controllers/register.controller";
 import { validate } from "~/middlewares/zod.middleware";
+import { auth } from "~/middlewares/auth.middleware";
 import { languageCreationSchema } from "~/schemas/language";
 import {
   artisanCreationSchema,
@@ -42,7 +43,7 @@ router.post("/artisan", validate(artisanCreationSchema), createArtisan);
 router.patch("/artisan", validate(artisanUpdationSchema), updateArtisan);
 //* safair
 router.post("/safari", validate(safariCreationSchema), createSafari);
-router.patch("/safari", validate(safariUpdationSchema), updateSafari);
+router.patch("/safari", auth, validate(safariUpdationSchema), updateSafari);
 //* fair
 router.post("/fair", validate(fairCreationSchema), createFair);
 router.patch("/fair", validate(fairUpdationSchema), updateFair);
