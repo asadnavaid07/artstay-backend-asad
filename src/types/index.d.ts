@@ -262,6 +262,7 @@ type FairUpdationProps = {
   lastName: string;
   address: string;
   description: string;
+  dp: string;
 };
 
 type FairProps = {

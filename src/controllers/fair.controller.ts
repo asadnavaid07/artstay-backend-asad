@@ -17,7 +17,7 @@ export const fairProfileByAccountId = async (req: Request, res: Response) => {
     }
 }
 
-export const createFairEvent = async (req: Request, res: Response) => {
+export const createFairEvent = async (req: Request, res: Response): Promise<void> => {
     try {
         console.log('createFairEvent controller called');
         console.log('Request body:', req.body);
@@ -48,6 +48,7 @@ export const createFairEvent = async (req: Request, res: Response) => {
         }
         console.log('Event created successfully');
         res.status(201).json(result);
+        return;
     } catch (error) {
         console.error('createFairEvent error:', error);
         logger.error(error)
@@ -56,14 +57,16 @@ export const createFairEvent = async (req: Request, res: Response) => {
             message: error instanceof Error ? error.message : 'Failed to create fair event',
             data: null
         });
+        return;
     }
 }
 
-export const updateFairEvent = async (req: Request, res: Response) => {
+export const updateFairEvent = async (req: Request, res: Response): Promise<void> => {
     try {
         const event = req.body
         const result = await fairService.updateFairEvent(event)
         res.status(201).json(result);
+        return;
     } catch (error) {
         logger.error(error)
         res.status(500).json({
@@ -71,6 +74,7 @@ export const updateFairEvent = async (req: Request, res: Response) => {
             message: error instanceof Error ? error.message : 'Failed to update fair event',
             data: null
         });
+        return;
     }
 }
 

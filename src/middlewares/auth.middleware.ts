@@ -9,7 +9,7 @@ declare module 'express-serve-static-core' {
   }
 }
 
-export const auth = async (req: Request, res: Response, next: NextFunction) => {
+export const auth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   console.log('Auth middleware called');
   console.log('Request URL:', req.url);
   console.log('Request method:', req.method);
@@ -32,7 +32,8 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
   
   if (!token) {
     console.log('No token found, returning 401');
-    return res.status(401).json({ error: 'Authentication required' });
+    res.status(401).json({ error: 'Authentication required' });
+    return;
   }
   
   try {
@@ -43,5 +44,6 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
   } catch (error) {
     console.error('Token verification failed:', error);
     res.status(401).json({ error: 'Invalid token' });
+    return;
   }
 };

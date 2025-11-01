@@ -19,13 +19,15 @@ export const createArtisan = async (req: Request, res: Response) => {
   }
 };
 
-export const updateArtisan = async (req: Request, res: Response) => {
+export const updateArtisan = async (req: Request, res: Response): Promise<void> => {
   try {
     const result = await registerationService.updateArtisan(req.body);
     if (result.status === "success") {
-      return res.status(200).json(result);
+      res.status(200).json(result);
+      return;
     }
-    return res.status(400).json(result);
+    res.status(400).json(result);
+    return;
   } catch (error) {
     logger.error(error);
     res.status(500).json({
@@ -34,6 +36,7 @@ export const updateArtisan = async (req: Request, res: Response) => {
         error instanceof Error ? error.message : "Failed to update artisan",
       data: null,
     });
+    return;
   }
 };
 
@@ -52,7 +55,7 @@ export const createSafari = async (req: Request, res: Response) => {
   }
 };
 
-export const updateSafari = async (req: Request, res: Response) => {
+export const updateSafari = async (req: Request, res: Response): Promise<void> => {
   try {
     console.log('updateSafari controller called');
     console.log('Request body:', req.body);
@@ -72,6 +75,7 @@ export const updateSafari = async (req: Request, res: Response) => {
     const result = await registerationService.updateSafari(safariData);
     console.log('Service result:', result);
     res.status(201).json(result);
+    return;
   } catch (error) {
     console.error('updateSafari controller error:', error);
     logger.error(error);
@@ -81,6 +85,7 @@ export const updateSafari = async (req: Request, res: Response) => {
         error instanceof Error ? error.message : "Failed to update safari",
       data: null,
     });
+    return;
   }
 };
 
