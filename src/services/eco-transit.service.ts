@@ -105,9 +105,83 @@ export const ecoTransitService = {
         message: "application status",
         data: application,
       };
+    } catch (error: any) {
+      logger.error(error);
+      // Handle table not existing case
+      if (error?.code === "P2021" || error?.meta?.table === "public.EcoTransit") {
+        return {
+          status: "success",
+          message: "application status",
+          data: null, // Return null if table doesn't exist (no application yet)
+        };
+      }
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to fetch application status",
+        data: null,
+      };
+    }
+  },
+  getEcoTransitFilters: async () => {
+    try {
+      const ecoTransits = await prisma.ecoTransit.findMany({
+        where: {
+          isActive: true,
+        },
+        select: {
+          address: true,
+          EcoTransitOption: {
+            select: {
+              title: true,
+              baseFee: true,
+            },
+          },
+        },
+      });
+
+      // Extract unique addresses (locations)
+      const locations = [
+        ...new Set(ecoTransits.map((transit) => transit.address).filter((addr) => addr && addr !== "none")),
+      ].sort();
+
+      // Extract unique vehicle types from options
+      const vehicleTypes = new Set<string>();
+      ecoTransits.forEach((transit) => {
+        transit.EcoTransitOption.forEach((option) => {
+          if (option.title && option.title !== "none") {
+            vehicleTypes.add(option.title);
+          }
+        });
+      });
+
+      // Create price ranges based on base fees
+      const allFees = ecoTransits
+        .flatMap((transit) => transit.EcoTransitOption.map((opt) => opt.baseFee))
+        .filter((fee) => fee > 0);
+
+      const priceRanges: string[] = [];
+      if (allFees.length > 0) {
+        const minFee = Math.min(...allFees);
+        const maxFee = Math.max(...allFees);
+
+        if (minFee < 50) priceRanges.push("Under $50");
+        if (allFees.some((fee) => fee >= 50 && fee < 100)) priceRanges.push("$50-$100");
+        if (allFees.some((fee) => fee >= 100 && fee < 200)) priceRanges.push("$100-$200");
+        if (maxFee >= 200) priceRanges.push("$200+");
+      }
+
+      return {
+        status: "success",
+        message: "Eco transit filters fetched successfully",
+        data: {
+          locations: locations,
+          vehicleTypes: Array.from(vehicleTypes).sort(),
+          priceRanges: priceRanges,
+        },
+      };
     } catch (error) {
       logger.error(error);
-      throw new Error("Failed to fetch application status");
+      throw new Error("Failed to fetch eco transit filters");
     }
   },
   findEcoTransitAdventure: async (payload: {

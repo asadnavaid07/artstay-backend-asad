@@ -2,6 +2,7 @@ import { Request } from "express";
 import { hash } from "bcrypt";
 import prisma from "~/libs/prisma";
 import { logger } from "~/utils/logger";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export const documentorService = {
   getApplicationStatus: async (accountId: string) => {
@@ -153,6 +154,7 @@ export const documentorService = {
           specialization: true,
           craftFocusAreas: true,
           languages: true,
+          address: true,
           DocumentorPackage: {
             select: {
               packageType: true,
@@ -180,6 +182,14 @@ export const documentorService = {
         doc.languages.forEach((lang) => languages.add(lang));
       });
 
+      // Extract unique locations
+      const locations = new Set<string>();
+      documentors.forEach((doc) => {
+        if (doc.address) {
+          locations.add(doc.address);
+        }
+      });
+
       // Extract craftPackage types
       const packageTypes = new Set<string>();
       const priceRanges = new Set<string>();
@@ -205,6 +215,7 @@ export const documentorService = {
           specializations: Array.from(specializations).sort(),
           craftFocusAreas: Array.from(craftFocusAreas).sort(),
           languages: Array.from(languages).sort(),
+          locations: Array.from(locations).sort(),
           packageTypes: Array.from(packageTypes).sort(),
           priceRanges: Array.from(priceRanges).sort(),
         },
@@ -279,6 +290,19 @@ export const documentorService = {
   },
   createProfile: async (profileData: DocumentorProfileInput) => {
     try {
+      // Check if account with this email already exists
+      const existingAccount = await prisma.account.findUnique({
+        where: { email: profileData.email },
+      });
+
+      if (existingAccount) {
+        return {
+          status: "error",
+          message: "An account with this email already exists. Please use a different email or log in with your existing account.",
+          data: null,
+        };
+      }
+
       const hashedPassword = await hash(profileData.password, 10);
       const account = await prisma.account.create({
         data: {
@@ -291,7 +315,7 @@ export const documentorService = {
         data: {
           firstName: profileData.firstName,
           lastName: profileData.lastName,
-          dp: profileData.dp,
+          dp: profileData.dp || "/placeholder.png",
           description: profileData.description,
           address: profileData.address,
           yearsExperience: profileData.yearsExperience,
@@ -308,6 +332,16 @@ export const documentorService = {
       };
     } catch (error) {
       logger.error(error);
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === "P2002") {
+          return {
+            status: "error",
+            message: "An account with this email already exists. Please use a different email or log in with your existing account.",
+            data: null,
+          };
+        }
+        throw new Error(error.message);
+      }
       throw new Error("Failed to create profile");
     }
   },

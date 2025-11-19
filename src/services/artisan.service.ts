@@ -171,7 +171,7 @@ export const artisanService = {
           firstName: booking.firstName,
           lastName: booking.lastName,
           email: booking.email,
-          phone: booking.email,
+          phone: booking.phone,
           additionalNote: booking.additionalNote,
         },
       });

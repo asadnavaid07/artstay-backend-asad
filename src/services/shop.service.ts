@@ -23,6 +23,9 @@ export const shopService = {
   getFilterOptions: async () => {
     try {
       const shops = await prisma.shop.findMany({
+        where: {
+          isActive: true,
+        },
         select: {
           city: true,
           state: true,

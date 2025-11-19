@@ -124,6 +124,13 @@ export const createDocumentorProfile = async (req: Request, res: Response) => {
   try {
     const profileData: DocumentorProfileInput = req.body;
     const result = await documentorService.createProfile(profileData);
+    
+    // If the service returns an error status, respond with appropriate status code
+    if (result.status === "error") {
+      res.status(400).json(result);
+      return;
+    }
+    
     res.status(201).json(result);
   } catch (error) {
     logger.error(error);

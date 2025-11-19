@@ -311,6 +311,13 @@ export const deleteLanguageService = async (req: Request, res: Response) => {
 export const createEcoTransit = async (req: Request, res: Response) => {
   try {
     const result = await registerationService.createEcoTransit(req.body);
+    
+    // If the service returns an error status, respond with appropriate status code
+    if (result.status === "error") {
+      res.status(400).json(result);
+      return;
+    }
+    
     res.status(201).json(result);
   } catch (error) {
     logger.error(error);

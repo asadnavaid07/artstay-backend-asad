@@ -78,11 +78,36 @@ export const getAllEcoTransits = async (req: Request, res: Response) => {
 export const getApplicationStatus = async (req: Request, res: Response) => {
     try {
         const result = await ecoTransitService.getApplicationStatus(req.params.accountId);
+        
+        // If the service returns an error status, respond with appropriate status code
+        if (result.status === "error") {
+            res.status(500).json(result);
+            return;
+        }
+        
         res.status(200).json(result);
     } catch (error) {
         logger.error(error);
-        res.status(500).json({ status: 'error', message: error instanceof Error ? error.message : 'Failed to fetch application status', data: null });
+        res.status(500).json({ 
+            status: 'error', 
+            message: error instanceof Error ? error.message : 'Failed to fetch application status', 
+            data: null 
+        });
     }
+};
+
+export const getEcoTransitFilters = async (req: Request, res: Response) => {
+  try {
+    const result = await ecoTransitService.getEcoTransitFilters();
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to fetch eco transit filters",
+      data: null,
+    });
+  }
 };
 
 export const findEcoTransitAdventure = async (req: Request, res: Response) => {

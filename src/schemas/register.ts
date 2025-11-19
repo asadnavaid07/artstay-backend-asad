@@ -185,18 +185,18 @@ export const travelPlanerUpdationSchema = z.object({
 })
 
 export const ecoTransitCreationSchema = z.object({
-    name: z.string(),
-    address: z.string(),
-    description: z.string(),
-    dp: z.string(),
-    email: z.string(),
-    password: z.string()
+    name: z.string().min(1, "Name is required"),
+    address: z.string().min(1, "Address is required"),
+    description: z.string().min(1, "Description is required"),
+    dp: z.string().min(1, "Display picture is required"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters")
 })
 
 export const ecoTransitUpdationSchema = z.object({
-    name: z.string(),
-    address: z.string(),
-    description: z.string(),
-    dp: z.string(),
-    accountId: z.string()
+    name: z.string().min(1, "Name is required"),
+    address: z.string().min(1, "Address is required"),
+    description: z.string().min(1, "Description is required"),
+    dp: z.string().min(1, "Display picture is required"),
+    accountId: z.string().min(1, "Account ID is required")
 })

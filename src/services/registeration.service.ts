@@ -643,7 +643,11 @@ export const registerationService = {
         where: { email: ecoTransit.email },
       });
       if (existingAccount) {
-        throw new Error("Account already exists with this email");
+        return {
+          status: "error",
+          message: "An account with this email already exists. Please use a different email or log in with your existing account.",
+          data: null,
+        };
       }
 
       const hashedPassword = await hash(ecoTransit.password, 10);
@@ -652,7 +656,7 @@ export const registerationService = {
         data: {
           email: ecoTransit.email,
           password: hashedPassword,
-          accountType: "ECO_TRANSIT",
+          accountType: "ECO_TRANSIT" as AccountTypeEnum,
         },
       });
 
@@ -661,7 +665,7 @@ export const registerationService = {
           name: ecoTransit.name,
           address: ecoTransit.address,
           description: ecoTransit.description,
-          dp: ecoTransit.dp,
+          dp: ecoTransit.dp || "/placeholder.png",
           accountId: account.userId,
         },
       });
@@ -671,9 +675,41 @@ export const registerationService = {
         message: "eco transit created",
         data: null,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error);
-      throw new Error("Failed to create eco transit");
+      
+      // Handle enum error (ECO_TRANSIT not in database enum)
+      if (error?.message?.includes("invalid input value for enum") || error?.message?.includes("ECO_TRANSIT")) {
+        return {
+          status: "error",
+          message: "Database migration required: ECO_TRANSIT account type is not available. Please contact the administrator.",
+          data: null,
+        };
+      }
+      
+      // Handle table not existing
+      if (error?.code === "P2021" || error?.meta?.table === "public.EcoTransit") {
+        return {
+          status: "error",
+          message: "Database migration required: EcoTransit table does not exist. Please run database migrations.",
+          data: null,
+        };
+      }
+      
+      // Handle Prisma unique constraint errors
+      if (error?.code === "P2002") {
+        return {
+          status: "error",
+          message: "An account with this email already exists. Please use a different email or log in with your existing account.",
+          data: null,
+        };
+      }
+      
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to create eco transit",
+        data: null,
+      };
     }
   },
   updateEcoTransit: async (ecoTransit: EcoTransitUpdationProps) => {
