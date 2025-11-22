@@ -173,6 +173,19 @@ export const shopService = {
   },
   createProduct: async (product: ProductCreationProps) => {
     try {
+      // First check if the account exists
+      const account = await prisma.account.findUnique({
+        where: {
+          userId: product.accountId,
+        },
+      });
+
+      if (!account) {
+        throw new Error(
+          `Account with ID ${product.accountId} does not exist. Please create a shop first using POST /register/shop, then use the userId from the Account as the accountId for products.`
+        );
+      }
+
       let shop = await prisma.shop.findUnique({
         where: {
           accountId: product.accountId,
@@ -193,7 +206,7 @@ export const shopService = {
             zipCode: "00000",
             ownerName: "Owner not provided",
             phoneNumber: "0000000000",
-            email: "email@example.com",
+            email: account.email,
             website: "",
             description: "Shop profile not completed yet",
             productCategories: [],
@@ -324,6 +337,9 @@ export const shopService = {
             lastName: order.lastName,
             email: order.email,
             phone: order.phone,
+            address: order.address,
+            city: order.city,
+            postalCode: order.postalCode,
             additionalNote: order.additionalNote || "",
           },
         });

@@ -251,7 +251,7 @@ export const registerationService = {
         },
       });
 
-      await prisma.shop.create({
+      const shop = await prisma.shop.create({
         data: {
           businessName: vendorData.businessName,
           shopName: vendorData.shopName,
@@ -290,7 +290,11 @@ export const registerationService = {
       return {
         status: "success",
         message: "Vendor registration successful",
-        data: null,
+        data: {
+          accountId: account.userId,
+          shopId: shop.shopId,
+          email: account.email,
+        },
       };
     } catch (error) {
       logger.error(error);

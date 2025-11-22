@@ -973,6 +973,7 @@ type ShopOrderCreationProps = {
   phone: string;
   address: string;
   city: string;
+  postalCode: string;
   additionalNote?: string;
   shopId: string;
   subtotal: number;
