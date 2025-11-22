@@ -11,6 +11,7 @@ export const FairEventSchema = z.object({
     latitude: z.number(),
     longitude: z.number(),
     description: z.string(),
+    accountId: z.string(),
 })
 
 export const UpdateFairEventSchema = z.object({

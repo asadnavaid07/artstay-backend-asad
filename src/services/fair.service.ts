@@ -12,6 +12,9 @@ export const fairService = {
           lastName: bookingData.lastName,
           email: bookingData.email,
           phone: bookingData.phone,
+          address: bookingData.address,
+          city: bookingData.city,
+          postalCode: bookingData.postalCode,
           additionalNote: bookingData.additionalNote,
         },
       });

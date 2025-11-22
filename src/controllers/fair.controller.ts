@@ -19,39 +19,27 @@ export const fairProfileByAccountId = async (req: Request, res: Response) => {
 
 export const createFairEvent = async (req: Request, res: Response): Promise<void> => {
     try {
-        console.log('createFairEvent controller called');
-        console.log('Request body:', req.body);
-        console.log('Request userId:', req.userId);
-        console.log('Request headers:', req.headers);
+        const event = req.body;
         
-        const event = req.body
-        const accountId = req.userId?.toString() // Get userId from auth middleware
-        
-        console.log('AccountId from userId:', accountId);
-        
-        if (!accountId) {
-            console.log('No accountId found, user not authenticated');
-            res.status(401).json({ status: 'error', message: 'User not authenticated' })
-            return
+        if (!event.accountId) {
+            res.status(400).json({ 
+                status: 'error', 
+                message: 'accountId is required in request body' 
+            });
+            return;
         }
         
-        const eventWithAccountId = { ...event, accountId }
-        console.log('Event with accountId:', eventWithAccountId);
-        
-        const result = await fairService.createFairEvent(eventWithAccountId)
-        console.log('Service result:', result);
+        const result = await fairService.createFairEvent(event);
         
         if (result.status === 'error') {
-            console.log('Service returned error:', result.message);
-            res.status(400).json({ status: 'error', errors: [result.message] })
-            return
+            res.status(400).json({ status: 'error', errors: [result.message] });
+            return;
         }
-        console.log('Event created successfully');
+        
         res.status(201).json(result);
         return;
     } catch (error) {
-        console.error('createFairEvent error:', error);
-        logger.error(error)
+        logger.error(error);
         res.status(500).json({
             status: 'error',
             message: error instanceof Error ? error.message : 'Failed to create fair event',

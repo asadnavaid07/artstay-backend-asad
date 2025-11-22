@@ -188,7 +188,7 @@ export const registerationService = {
         },
       });
 
-      await prisma.fair.create({
+      const fairRecord = await prisma.fair.create({
         data: {
           firstName: fair.firstName,
           lastName: fair.lastName,
@@ -198,7 +198,15 @@ export const registerationService = {
           accountId: account.userId,
         },
       });
-      return { status: "success", message: "fair created", data: null };
+      return {
+        status: "success",
+        message: "fair created",
+        data: {
+          accountId: account.userId,
+          fairId: fairRecord.fairId,
+          email: account.email,
+        },
+      };
     } catch (error) {
       logger.error(error);
       return {

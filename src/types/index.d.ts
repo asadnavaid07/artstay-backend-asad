@@ -296,6 +296,9 @@ type FairBookingInput = {
   lastName: string;
   email: string;
   phone: string;
+  address: string;
+  city: string;
+  postalCode: string;
   numberOfTickets: number;
   ticketType: string;
   additionalNote: string;
